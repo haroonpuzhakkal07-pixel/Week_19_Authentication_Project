@@ -1,13 +1,18 @@
 from django.shortcuts import render, redirect
 from .forms import RegisterForm, LoginForm
 from django.contrib.auth import login, authenticate, logout
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseForbidden
 from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 @login_required(login_url='login')
 def home_view(request):
-    return render(request, 'accounts/home.html')
+    if request.user.is_superuser:
+        return HttpResponse("Welcome Admin")
+    elif request.user.is_superuser:
+        return HttpResponse("Welcome Staff")
+    else:
+        return HttpResponse(f"Welcome User({request.user.username})")
 
 def register_view(request):
     if request.method == 'POST':
@@ -39,3 +44,15 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect('login')
+
+@login_required(login_url='login')
+def admin_only_view(request):
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("You are not allowed here")
+    return HttpResponse("Welcome Admin Panel")
+
+@login_required
+def special_view(request):
+    if request.user.has_perm('auth.view_user'):
+        return HttpResponse("You can view users")
+    return HttpResponse("Permission Denied")
