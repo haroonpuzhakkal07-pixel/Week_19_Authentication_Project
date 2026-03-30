@@ -51,8 +51,8 @@ def admin_only_view(request):
         return HttpResponseForbidden("You are not allowed here")
     return HttpResponse("Welcome Admin Panel")
 
-@login_required
+@login_required(login_url='login')
 def special_view(request):
-    if request.user.has_perm('auth.view_user'):
+    if request.user.has_perm('accounts.view_customuser'):
         return HttpResponse("You can view users")
     return HttpResponse("Permission Denied")
